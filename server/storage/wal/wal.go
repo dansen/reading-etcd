@@ -808,10 +808,16 @@ func (w *WAL) sync() error {
 		return nil
 	}
 
+	// sync开始时间
 	start := time.Now()
+
+	// 写文件，windows下最终调用 Win32 的 FlushFileBuffers 函数
 	err := fileutil.Fdatasync(w.tail().File)
 
+	// 计算sync耗时
 	took := time.Since(start)
+
+	// 超过1秒报警
 	if took > warnSyncDuration {
 		w.lg.Warn(
 			"slow fdatasync",
