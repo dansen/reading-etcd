@@ -101,16 +101,20 @@ func startEtcdOrProxyV2(args []string) {
 	var errc <-chan error
 
 	which := identifyDataDirOrDie(cfg.ec.GetLogger(), cfg.ec.Dir)
+
 	if which != dirEmpty {
+		// 非空
 		lg.Info(
 			"server has already been initialized",
 			zap.String("data-dir", cfg.ec.Dir),
 			zap.String("dir-type", string(which)),
 		)
+		// 节点类型：raft成员、代理
 		switch which {
 		case dirMember:
 			stopped, errc, err = startEtcd(&cfg.ec)
 		case dirProxy:
+			// 代理
 			lg.Panic("v2 http proxy has already been deprecated in 3.6", zap.String("dir-type", string(which)))
 		default:
 			lg.Panic(
@@ -119,6 +123,7 @@ func startEtcdOrProxyV2(args []string) {
 			)
 		}
 	} else {
+		// 默认开启etcd
 		stopped, errc, err = startEtcd(&cfg.ec)
 		if err != nil {
 			lg.Warn("failed to start etcd", zap.Error(err))
@@ -178,6 +183,7 @@ func startEtcdOrProxyV2(args []string) {
 		lg.Fatal("discovery failed", zap.Error(err))
 	}
 
+	// 处理中断
 	osutil.HandleInterrupts(lg)
 
 	// At this point, the initialization of etcd is done.
@@ -187,6 +193,7 @@ func startEtcdOrProxyV2(args []string) {
 	// connections.
 	notifySystemd(lg)
 
+	// 等待退出
 	select {
 	case lerr := <-errc:
 		// fatal out on listener errors
@@ -199,15 +206,20 @@ func startEtcdOrProxyV2(args []string) {
 
 // startEtcd runs StartEtcd in addition to hooks needed for standalone etcd.
 func startEtcd(cfg *embed.Config) (<-chan struct{}, <-chan error, error) {
+	// 开启etcd
 	e, err := embed.StartEtcd(cfg)
 	if err != nil {
 		return nil, nil, err
 	}
+
 	osutil.RegisterInterruptHandler(e.Close)
 	select {
 	case <-e.Server.ReadyNotify(): // wait for e.Server to join the cluster
+		fmt.Println("recv ready notify")
 	case <-e.Server.StopNotify(): // publish aborted from 'ErrStopped'
+		fmt.Println("recv stop notify")
 	}
+
 	return e.Server.StopNotify(), e.Err(), nil
 }
 
@@ -238,6 +250,7 @@ func identifyDataDirOrDie(lg *zap.Logger, dir string) dirType {
 		}
 	}
 
+	// 通过文件名判断节点类型，不能同时存在member和proxy
 	if m && p {
 		lg.Fatal("invalid datadir; both member and proxy directories exist")
 	}

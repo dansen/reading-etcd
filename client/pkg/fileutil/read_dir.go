@@ -51,15 +51,19 @@ func ReadDir(d string, opts ...ReadDirOption) ([]string, error) {
 	}
 	defer dir.Close()
 
+	// -1 读取目录中所有的文件 win32 FindNextFile函数实现
 	names, err := dir.Readdirnames(-1)
 	if err != nil {
 		return nil, err
 	}
+	// 对字符串进行排序
 	sort.Strings(names)
 
+	// 过滤：匹配后缀
 	if op.ext != "" {
 		tss := make([]string, 0)
 		for _, v := range names {
+			// 获取后缀
 			if filepath.Ext(v) == op.ext {
 				tss = append(tss, v)
 			}

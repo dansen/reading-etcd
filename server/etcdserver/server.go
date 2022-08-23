@@ -1724,6 +1724,7 @@ func (s *EtcdServer) publishV3(timeout time.Duration) {
 		cancel()
 		switch err {
 		case nil:
+			// 没有错误，发送ready信号
 			close(s.readych)
 			lg.Info(
 				"published local member to cluster through raft",
