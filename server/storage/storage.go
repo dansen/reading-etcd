@@ -25,6 +25,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// Storage 定义好storage包的接口
 type Storage interface {
 	// Save function saves ents and state to the underlying stable storage.
 	// Save MUST block until st and ents are on stable storage.
@@ -43,21 +44,28 @@ type Storage interface {
 
 type storage struct {
 	lg *zap.Logger
-	s  *snap.Snapshotter
+	// 快照对象
+	s *snap.Snapshotter
 
 	// Mutex protected variables
+	// 写日志时的锁
 	mux sync.RWMutex
-	w   *wal.WAL
+	// WAL(Write-Ahead Logging)
+	// 往日志文件中追加数据，即使发生崩溃，也能从日志文件恢复
+	w *wal.WAL
 }
 
 func NewStorage(lg *zap.Logger, w *wal.WAL, s *snap.Snapshotter) Storage {
 	return &storage{lg: lg, w: w, s: s}
 }
 
+// 保存快照，协调snap和wal的快照保存逻辑
 // SaveSnap saves the snapshot file to disk and writes the WAL snapshot entry.
 func (st *storage) SaveSnap(snap raftpb.Snapshot) error {
+	// 使用只读锁锁住整个函数操作
 	st.mux.RLock()
 	defer st.mux.RUnlock()
+
 	walsnap := walpb.Snapshot{
 		Index:     snap.Metadata.Index,
 		Term:      snap.Metadata.Term,
@@ -87,6 +95,7 @@ func (st *storage) Release(snap raftpb.Snapshot) error {
 	return st.s.ReleaseSnapDBs(snap)
 }
 
+// 保存记录entry（记录可能是多条）
 func (st *storage) Save(s raftpb.HardState, ents []raftpb.Entry) error {
 	st.mux.RLock()
 	defer st.mux.RUnlock()

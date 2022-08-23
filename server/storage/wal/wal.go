@@ -927,6 +927,7 @@ func (w *WAL) Save(st raftpb.HardState, ents []raftpb.Entry) error {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 
+	// entry为空
 	// short cut, do not call sync
 	if raft.IsEmptyHardState(st) && len(ents) == 0 {
 		return nil

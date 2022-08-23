@@ -30,6 +30,7 @@ message Entry {
 	optional bytes      Data  = 4;
 }
 
+// 快照的meta元信息
 message SnapshotMetadata {
 	optional ConfState conf_state = 1 [(gogoproto.nullable) = false];
 	optional uint64    index      = 2 [(gogoproto.nullable) = false];
