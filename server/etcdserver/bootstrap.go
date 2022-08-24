@@ -535,8 +535,11 @@ func raftConfig(cfg config.ServerConfig, id uint64, s *raft.MemoryStorage) *raft
 	}
 }
 
+// 启动器 创建raft节点
 func (b *bootstrappedRaft) newRaftNode(ss *snap.Snapshotter, wal *wal.WAL, cl *membership.RaftCluster) *raftNode {
 	var n raft.Node
+
+	// 没有peers，直接创建一个node
 	if len(b.peers) == 0 {
 		n = raft.RestartNode(b.config)
 	} else {

@@ -37,6 +37,8 @@ type RawNode struct {
 	prevHardSt pb.HardState
 }
 
+// 在etcd 3.6.0之前是没有rawnode模块，现在出现的rawnode.go仅仅是raft模块的简单封装，
+// 并将raft.Node run协程中每轮循环需要保存的raft的前一次硬软状态prevSoftSt和prevHardSt保存到rawnode结构体中
 // NewRawNode instantiates a RawNode from the given configuration.
 //
 // See Bootstrap() for bootstrapping an initial state; this replaces the former

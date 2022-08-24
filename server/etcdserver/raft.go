@@ -88,6 +88,7 @@ type raftNode struct {
 	readStateC chan raft.ReadState
 
 	// utility
+	// 使用time.Ticker作为定时器
 	ticker *time.Ticker
 	// contention detectors for raft heartbeat message
 	td *contention.TimeoutDetector
@@ -138,7 +139,10 @@ func newRaftNode(cfg raftNodeConfig) *raftNode {
 		stopped:    make(chan struct{}),
 		done:       make(chan struct{}),
 	}
+
+	// 创建定时器
 	if r.heartbeat == 0 {
+		// 默认没有定时器，tick停止工作
 		r.ticker = &time.Ticker{}
 	} else {
 		r.ticker = time.NewTicker(r.heartbeat)

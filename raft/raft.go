@@ -198,6 +198,7 @@ type Config struct {
 	DisableProposalForwarding bool
 }
 
+// 验证配置
 func (c *Config) validate() error {
 	if c.ID == None {
 		return errors.New("cannot use none as id")
@@ -243,7 +244,9 @@ func (c *Config) validate() error {
 type raft struct {
 	id uint64
 
+	// 任期
 	Term uint64
+	// 投票
 	Vote uint64
 
 	readStates []ReadState
@@ -251,7 +254,9 @@ type raft struct {
 	// the log
 	raftLog *raftLog
 
-	maxMsgSize         uint64
+	// 最大消息数量
+	maxMsgSize uint64
+	// 最大未提交消息数量
 	maxUncommittedSize uint64
 	// TODO(tbg): rename to trk.
 	prs tracker.ProgressTracker
@@ -261,8 +266,10 @@ type raft struct {
 	// isLearner is true if the local raft node is a learner.
 	isLearner bool
 
+	// 节点间的消息
 	msgs []pb.Message
 
+	// 领导人的id
 	// the leader id
 	lead uint64
 	// leadTransferee is id of the leader transfer target when its value is not zero.
@@ -319,8 +326,12 @@ func newRaft(c *Config) *raft {
 	if err := c.validate(); err != nil {
 		panic(err.Error())
 	}
+
+	// 创建raftlog，storage和logger通过配置传入
 	raftlog := newLogWithSize(c.Storage, c.Logger, c.MaxCommittedSizePerReady)
+
 	hs, cs, err := c.Storage.InitialState()
+
 	if err != nil {
 		panic(err) // TODO(bdarnell)
 	}
@@ -357,6 +368,8 @@ func newRaft(c *Config) *raft {
 	if c.Applied > 0 {
 		raftlog.appliedTo(c.Applied)
 	}
+
+	// 初始化成为追随者
 	r.becomeFollower(r.Term, None)
 
 	var nodesStrs []string

@@ -25,6 +25,7 @@ type raftLog struct {
 	// storage contains all stable entries since the last snapshot.
 	storage Storage
 
+	// 不稳定的条目，待保存到storage
 	// unstable contains all unstable entries and snapshot.
 	// they will be saved into storage.
 	unstable unstable

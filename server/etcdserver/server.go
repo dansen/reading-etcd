@@ -317,6 +317,8 @@ func NewServer(cfg config.ServerConfig) (srv *EtcdServer, err error) {
 	lstats := stats.NewLeaderStats(cfg.Logger, b.cluster.nodeID.String())
 
 	heartbeat := time.Duration(cfg.TickMs) * time.Millisecond
+
+	// 创建etcd服务器对象，r是raft节点
 	srv = &EtcdServer{
 		readych:               make(chan struct{}),
 		Cfg:                   cfg,
@@ -2384,6 +2386,7 @@ func (s *EtcdServer) restoreAlarms() error {
 	return nil
 }
 
+// 封装函数，创建一个协程运行函数，使用waitgroup跟踪
 // GoAttach creates a goroutine on a given function and tracks it using
 // the etcdserver waitgroup.
 // The passed function should interrupt on s.StoppingNotify().
@@ -2396,6 +2399,7 @@ func (s *EtcdServer) GoAttach(f func()) {
 		lg.Warn("server has stopped; skipping GoAttach")
 		return
 	default:
+		fmt.Println("go attach default")
 	}
 
 	// now safe to add since waitgroup wait has not started yet

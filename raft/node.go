@@ -244,7 +244,11 @@ func RestartNode(c *Config) Node {
 		panic(err)
 	}
 	n := newNode(rn)
+
+	// raft节点创建后会执行run方法，节点所有和时间相关的逻辑都在这处理
 	go n.run()
+
+	// 返回节点
 	return &n
 }
 
