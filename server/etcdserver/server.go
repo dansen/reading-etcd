@@ -538,6 +538,7 @@ func (s *EtcdServer) Start() {
 	s.GoAttach(s.monitorDowngrade)
 }
 
+// 协程中run
 // start prepares and starts server in a new goroutine. It is no longer safe to
 // modify a server's fields after it has been sent to Start.
 // This function is just used for testing.
@@ -740,6 +741,7 @@ type raftReadyHandler struct {
 	updateCommittedIndex func(uint64)
 }
 
+// etcd server的run函数
 func (s *EtcdServer) run() {
 	lg := s.Logger()
 
@@ -844,6 +846,7 @@ func (s *EtcdServer) run() {
 	for {
 		select {
 		case ap := <-s.r.apply():
+			// 获得apply数据，执行schdule
 			f := schedule.NewJob("server_applyAll", func(context.Context) { s.applyAll(&ep, &ap) })
 			sched.Schedule(f)
 		case leases := <-expiredLeaseC:

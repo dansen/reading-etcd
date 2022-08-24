@@ -699,6 +699,7 @@ func (r *raft) tickHeartbeat() {
 func (r *raft) becomeFollower(term uint64, lead uint64) {
 	r.step = stepFollower
 	r.reset(term)
+	// 在追随者状态tick函数是选举
 	r.tick = r.tickElection
 	r.lead = lead
 	r.state = StateFollower
@@ -712,22 +713,31 @@ func (r *raft) becomeCandidate() {
 	}
 	r.step = stepCandidate
 	r.reset(r.Term + 1)
+
+	// 在候选人状态tick函数是选举
 	r.tick = r.tickElection
 	r.Vote = r.id
 	r.state = StateCandidate
 	r.logger.Infof("%x became candidate at term %d", r.id, r.Term)
 }
 
+// 变成预备候选人
 func (r *raft) becomePreCandidate() {
 	// TODO(xiangli) remove the panic when the raft implementation is stable
 	if r.state == StateLeader {
 		panic("invalid transition [leader -> pre-candidate]")
 	}
+
+	// 修改 step 函数
 	// Becoming a pre-candidate changes our step functions and state,
 	// but doesn't change anything else. In particular it does not increase
 	// r.Term or change r.Vote.
 	r.step = stepCandidate
+
+	// 清空投票
 	r.prs.ResetVotes()
+
+	// 在预备候选人状态 tick 函数是选举
 	r.tick = r.tickElection
 	r.lead = None
 	r.state = StatePreCandidate
@@ -739,8 +749,12 @@ func (r *raft) becomeLeader() {
 	if r.state == StateFollower {
 		panic("invalid transition [follower -> leader]")
 	}
+
+	// 设置step函数
 	r.step = stepLeader
 	r.reset(r.Term)
+
+	// 在领导人状态tick函数是心跳
 	r.tick = r.tickHeartbeat
 	r.lead = r.id
 	r.state = StateLeader
@@ -793,6 +807,7 @@ func (r *raft) hup(t CampaignType) {
 	r.campaign(t)
 }
 
+// 竞选活动
 // campaign transitions the raft instance to candidate state. This must only be
 // called after verifying that this is a legitimate transition.
 func (r *raft) campaign(t CampaignType) {
@@ -803,6 +818,8 @@ func (r *raft) campaign(t CampaignType) {
 	}
 	var term uint64
 	var voteMsg pb.MessageType
+
+	//
 	if t == campaignPreElection {
 		r.becomePreCandidate()
 		voteMsg = pb.MsgPreVote
@@ -1630,6 +1647,7 @@ func (r *raft) restore(s pb.Snapshot) bool {
 // which is true when its own id is in progress list.
 func (r *raft) promotable() bool {
 	pr := r.prs.Progress[r.id]
+	// 不是learner，并且没有要保存的snap
 	return pr != nil && !pr.IsLearner && !r.raftLog.hasPendingSnapshot()
 }
 
@@ -1721,6 +1739,7 @@ func (r *raft) loadState(state pb.HardState) {
 	r.Vote = state.Vote
 }
 
+// 是否超时
 // pastElectionTimeout returns true iff r.electionElapsed is greater
 // than or equal to the randomized election timeout in
 // [electiontimeout, 2 * electiontimeout - 1].
@@ -1729,6 +1748,7 @@ func (r *raft) pastElectionTimeout() bool {
 }
 
 func (r *raft) resetRandomizedElectionTimeout() {
+	// 随机时间最小是设置的1倍，最大是设置的2倍
 	r.randomizedElectionTimeout = r.electionTimeout + globalRand.Intn(r.electionTimeout)
 }
 

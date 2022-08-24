@@ -14,6 +14,7 @@
 
 package quorum
 
+// 数组当做type，脑洞清奇
 // JointConfig is a configuration of two groups of (possibly overlapping)
 // majority configurations. Decisions require the support of both majorities.
 type JointConfig [2]MajorityConfig

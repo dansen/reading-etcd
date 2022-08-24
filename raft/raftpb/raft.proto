@@ -45,6 +45,7 @@ message Snapshot {
 // For description of different message types, see:
 // https://pkg.go.dev/go.etcd.io/etcd/raft/v3#hdr-MessageType
 enum MessageType {
+    // 起步，开始选举
 	MsgHup             = 0;
 	MsgBeat            = 1;
 	MsgProp            = 2;

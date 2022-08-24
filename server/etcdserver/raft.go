@@ -150,6 +150,7 @@ func newRaftNode(cfg raftNodeConfig) *raftNode {
 	return r
 }
 
+// 使用了互斥量，多协程调用
 // raft.Node does not have locks in Raft package
 func (r *raftNode) tick() {
 	r.tickMu.Lock()
@@ -169,8 +170,10 @@ func (r *raftNode) start(rh *raftReadyHandler) {
 		for {
 			select {
 			case <-r.ticker.C:
+				// 定时器函数
 				r.tick()
 			case rd := <-r.Ready():
+				// 从r中取得可用数据
 				if rd.SoftState != nil {
 					newLeader := rd.SoftState.Lead != raft.None && rh.getLead() != rd.SoftState.Lead
 					if newLeader {
@@ -213,6 +216,7 @@ func (r *raftNode) start(rh *raftReadyHandler) {
 
 				updateCommittedIndex(&ap, rh)
 
+				// ready之后，继续将apply数据发送到channel
 				select {
 				case r.applyc <- ap:
 				case <-r.stopped:

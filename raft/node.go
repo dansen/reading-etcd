@@ -281,6 +281,8 @@ func newNode(rn *RawNode) node {
 		confstatec: make(chan pb.ConfState),
 		readyc:     make(chan Ready),
 		advancec:   make(chan struct{}),
+
+		// 支持缓存tick消息
 		// make tickc a buffered chan, so raft node can buffer some ticks when the node
 		// is busy processing raft messages. Raft node will resume process buffered
 		// ticks when it becomes idle.
@@ -363,6 +365,7 @@ func (n *node) run() {
 				r.Step(m)
 			}
 		case cc := <-n.confc:
+			// 配置发生变化，注意这里的配置是指节点id
 			_, okBefore := r.prs.Progress[r.id]
 			cs := r.applyConfChange(cc)
 			// If the node was removed, block incoming proposals. Note that we
