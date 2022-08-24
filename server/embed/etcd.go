@@ -87,6 +87,7 @@ type peerListener struct {
 	close func(context.Context) error
 }
 
+// 开启etcd服务器和http服务，返回的server不保证已经连上集群，等待ready通知
 // StartEtcd launches the etcd server and HTTP handlers for client/server communication.
 // The returned Etcd.Server is not guaranteed to have joined the cluster. Wait
 // on the Etcd.Server.ReadyNotify() channel to know when it completes and is ready for use.
@@ -95,6 +96,7 @@ func StartEtcd(inCfg *Config) (e *Etcd, err error) {
 		return nil, err
 	}
 	serving := false
+	// 创建etcd实例
 	e = &Etcd{cfg: *inCfg, stopc: make(chan struct{})}
 	cfg := &e.cfg
 	defer func() {
@@ -104,6 +106,7 @@ func StartEtcd(inCfg *Config) (e *Etcd, err error) {
 		if !serving {
 			// errored before starting gRPC server for serveCtx.serversC
 			for _, sctx := range e.sctxs {
+				// 关闭channel
 				close(sctx.serversC)
 			}
 		}

@@ -212,7 +212,9 @@ func startEtcd(cfg *embed.Config) (<-chan struct{}, <-chan error, error) {
 		return nil, nil, err
 	}
 
+	// windows没有实现
 	osutil.RegisterInterruptHandler(e.Close)
+
 	select {
 	case <-e.Server.ReadyNotify(): // wait for e.Server to join the cluster
 		fmt.Println("recv ready notify")
