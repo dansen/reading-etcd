@@ -37,9 +37,11 @@ type Changer struct {
 // config is empty and initializes it with a copy of the incoming (=left)
 // majority config. That is, it transitions from
 //
-//     (1 2 3)&&()
+//	(1 2 3)&&()
+//
 // to
-//     (1 2 3)&&(1 2 3).
+//
+//	(1 2 3)&&(1 2 3).
 //
 // The supplied changes are then applied to the incoming majority config,
 // resulting in a joint configuration that in terms of the Raft thesis[1]
@@ -146,6 +148,7 @@ func (c Changer) Simple(ccs ...pb.ConfChangeSingle) (tracker.Config, tracker.Pro
 	return checkAndReturn(cfg, prs)
 }
 
+// 应用一个change
 // apply a change to the configuration. By convention, changes to voters are
 // always made to the incoming majority config Voters[0]. Voters[1] is either
 // empty or preserves the outgoing majority configuration while in a joint state.
@@ -159,12 +162,20 @@ func (c Changer) apply(cfg *tracker.Config, prs tracker.ProgressMap, ccs ...pb.C
 		}
 		switch cc.Type {
 		case pb.ConfChangeAddNode:
+			// 增加节点
 			c.makeVoter(cfg, prs, cc.NodeID)
+			fmt.Printf("add node %x\n", cc.NodeID)
 		case pb.ConfChangeAddLearnerNode:
+			// 增加learner节点
 			c.makeLearner(cfg, prs, cc.NodeID)
+			fmt.Printf("add learner node %x\n", cc.NodeID)
 		case pb.ConfChangeRemoveNode:
+			fmt.Printf("remove node %x\n", cc.NodeID)
+			// 删除节点
 			c.remove(cfg, prs, cc.NodeID)
 		case pb.ConfChangeUpdateNode:
+			// 更新节点
+			fmt.Printf("update node %x\n", cc.NodeID)
 		default:
 			return fmt.Errorf("unexpected conf type %d", cc.Type)
 		}
@@ -249,9 +260,12 @@ func (c Changer) remove(cfg *tracker.Config, prs tracker.ProgressMap, id uint64)
 func (c Changer) initProgress(cfg *tracker.Config, prs tracker.ProgressMap, id uint64, isLearner bool) {
 	if !isLearner {
 		incoming(cfg.Voters)[id] = struct{}{}
+		fmt.Printf("set Voters[%x] value\n", id)
 	} else {
 		nilAwareAdd(&cfg.Learners, id)
 	}
+
+	fmt.Printf("set prs[%x] lastIndex %v\n", id, c.LastIndex)
 	prs[id] = &tracker.Progress{
 		// Initializing the Progress with the last index means that the follower
 		// can be probed (with the last index).
@@ -403,7 +417,10 @@ func joint(cfg tracker.Config) bool {
 	return len(outgoing(cfg.Voters)) > 0
 }
 
-func incoming(voters quorum.JointConfig) quorum.MajorityConfig      { return voters[0] }
+// [0]是incoming
+func incoming(voters quorum.JointConfig) quorum.MajorityConfig { return voters[0] }
+
+// [1]是outgoing
 func outgoing(voters quorum.JointConfig) quorum.MajorityConfig      { return voters[1] }
 func outgoingPtr(voters *quorum.JointConfig) *quorum.MajorityConfig { return &voters[1] }
 

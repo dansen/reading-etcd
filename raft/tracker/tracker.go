@@ -253,6 +253,8 @@ func (p *ProgressTracker) ResetVotes() {
 	p.Votes = map[uint64]bool{}
 }
 
+// 记录选票，v是支持还是反对
+// 如果没有投过，记录值
 // RecordVote records that the node with the given id voted for this Raft
 // instance if v == true (and declined it otherwise).
 func (p *ProgressTracker) RecordVote(id uint64, v bool) {
@@ -262,6 +264,7 @@ func (p *ProgressTracker) RecordVote(id uint64, v bool) {
 	}
 }
 
+// tally计数，计票，返回支持和反对的票数，以及是否出结果了
 // TallyVotes returns the number of granted and rejected Votes, and whether the
 // election outcome is known.
 func (p *ProgressTracker) TallyVotes() (granted int, rejected int, _ quorum.VoteResult) {
@@ -269,6 +272,8 @@ func (p *ProgressTracker) TallyVotes() (granted int, rejected int, _ quorum.Vote
 	// contains members no longer part of the configuration. This doesn't really
 	// matter in the way the numbers are used (they're informational), but might
 	// as well get it right.
+
+	// Progress是节点信息map
 	for id, pr := range p.Progress {
 		if pr.IsLearner {
 			continue
@@ -277,12 +282,15 @@ func (p *ProgressTracker) TallyVotes() (granted int, rejected int, _ quorum.Vote
 		if !voted {
 			continue
 		}
+		// granted和rejected是在返回值中定义的
 		if v {
 			granted++
 		} else {
 			rejected++
 		}
 	}
+
+	// 计算结果
 	result := p.Voters.VoteResult(p.Votes)
 	return granted, rejected, result
 }

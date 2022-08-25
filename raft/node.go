@@ -17,6 +17,7 @@ package raft
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	pb "go.etcd.io/etcd/raft/v3/raftpb"
 )
@@ -365,6 +366,7 @@ func (n *node) run() {
 				r.Step(m)
 			}
 		case cc := <-n.confc:
+			fmt.Println("recv cc := <-n.confc")
 			// 配置发生变化，注意这里的配置是指节点id
 			_, okBefore := r.prs.Progress[r.id]
 			cs := r.applyConfChange(cc)
@@ -517,9 +519,11 @@ func (n *node) Advance() {
 }
 
 func (n *node) ApplyConfChange(cc pb.ConfChangeI) *pb.ConfState {
+	fmt.Println("ApplyConfChange")
 	var cs pb.ConfState
 	select {
 	case n.confc <- cc.AsV2():
+		fmt.Println("ApplyConfChange n.confc <- cc.AsV2()")
 	case <-n.done:
 	}
 	select {

@@ -216,6 +216,7 @@ func (r *raftNode) start(rh *raftReadyHandler) {
 
 				updateCommittedIndex(&ap, rh)
 
+				fmt.Println("read local data and send applyc, ready之后，继续将apply数据发送到channel")
 				// ready之后，继续将apply数据发送到channel
 				select {
 				case r.applyc <- ap:

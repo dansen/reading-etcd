@@ -48,6 +48,7 @@ func MarshalConfChange(c ConfChangeI) (EntryType, []byte, error) {
 
 // AsV2 returns a V2 configuration change carrying out the same operation.
 func (c ConfChange) AsV2() ConfChangeV2 {
+	fmt.Println("AsV2", c.Type, c.NodeID)
 	return ConfChangeV2{
 		Changes: []ConfChangeSingle{{
 			Type:   c.Type,

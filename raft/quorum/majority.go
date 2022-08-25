@@ -177,6 +177,8 @@ func (c MajorityConfig) CommittedIndex(l AckedIndexer) Index {
 // quorum of no has been reached).
 func (c MajorityConfig) VoteResult(votes map[uint64]bool) VoteResult {
 	if len(c) == 0 {
+		// 如果节点数为0，说明是空配置，直接赢
+		// joint 联合的 quorums 法定人数
 		// By convention, the elections on an empty config win. This comes in
 		// handy with joint quorums because it'll make a half-populated joint
 		// quorum behave like a majority quorum.
@@ -189,6 +191,8 @@ func (c MajorityConfig) VoteResult(votes map[uint64]bool) VoteResult {
 	for id := range c {
 		v, ok := votes[id]
 		if !ok {
+			// 表示这个节点还没投票，missing状态
+			fmt.Printf("节点 %x 还未投票\n", id)
 			missing++
 			continue
 		}
@@ -199,12 +203,19 @@ func (c MajorityConfig) VoteResult(votes map[uint64]bool) VoteResult {
 		}
 	}
 
+	// 票数的一半+1
+	// 若c为偶数，比如4，那么q就是3，也就是3：1才能竞选成功
+	// 若c为基数，比如3，那么q就是2，也就是2：1就能竞选成功
 	q := len(c)/2 + 1
 	if ny[1] >= q {
 		return VoteWon
 	}
+
+	// 如果当前票数加上未知的票数还有机会，那么就pending等待
 	if ny[1]+missing >= q {
 		return VotePending
 	}
+
+	// 如果加上未知票数还赢不了，直接投降
 	return VoteLost
 }

@@ -64,13 +64,19 @@ func (c JointConfig) VoteResult(votes map[uint64]bool) VoteResult {
 	r2 := c[1].VoteResult(votes)
 
 	if r1 == r2 {
+		// 新老配置都赢了
 		// If they agree, return the agreed state.
 		return r1
 	}
+
 	if r1 == VoteLost || r2 == VoteLost {
+		// 有一个配置输了
 		// If either config has lost, loss is the only possible outcome.
 		return VoteLost
 	}
+
+	// 1个赢，1个等待，继续等待
+	// 2个都是等待？？？
 	// One side won, the other one is pending, so the whole outcome is.
 	return VotePending
 }

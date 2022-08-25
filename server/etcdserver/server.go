@@ -846,6 +846,7 @@ func (s *EtcdServer) run() {
 	for {
 		select {
 		case ap := <-s.r.apply():
+			fmt.Println("获得apply数据，执行schdule")
 			// 获得apply数据，执行schdule
 			f := schedule.NewJob("server_applyAll", func(context.Context) { s.applyAll(&ep, &ap) })
 			sched.Schedule(f)
@@ -923,6 +924,7 @@ func (s *EtcdServer) Cleanup() {
 }
 
 func (s *EtcdServer) applyAll(ep *etcdProgress, apply *toApply) {
+	fmt.Println("applyAll")
 	s.applySnapshot(ep, apply)
 	s.applyEntries(ep, apply)
 

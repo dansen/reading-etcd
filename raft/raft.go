@@ -811,6 +811,7 @@ func (r *raft) hup(t CampaignType) {
 // campaign transitions the raft instance to candidate state. This must only be
 // called after verifying that this is a legitimate transition.
 func (r *raft) campaign(t CampaignType) {
+	fmt.Printf("campaign %v\n", t)
 	if !r.promotable() {
 		// This path should not be hit (callers are supposed to check), but
 		// better safe than sorry.
@@ -831,6 +832,7 @@ func (r *raft) campaign(t CampaignType) {
 		term = r.Term
 	}
 	if _, _, res := r.poll(r.id, voteRespMsgType(voteMsg), true); res == quorum.VoteWon {
+		// 先给自己投票
 		// We won the election after voting for ourselves (which must mean that
 		// this is a single-node cluster). Advance to the next state.
 		if t == campaignPreElection {
@@ -864,13 +866,22 @@ func (r *raft) campaign(t CampaignType) {
 	}
 }
 
+// 投票函数
+// r是被投票的对象
+// id是投票人id
+// v是投支持票还是反对票
 func (r *raft) poll(id uint64, t pb.MessageType, v bool) (granted int, rejected int, result quorum.VoteResult) {
+	fmt.Printf("%v投票给%v 是否支持 %v 消息类型 %v", id, r.id, v, t)
 	if v {
 		r.logger.Infof("%x received %s from %x at term %d", r.id, t, id, r.Term)
 	} else {
 		r.logger.Infof("%x received %s rejection from %x at term %d", r.id, t, id, r.Term)
 	}
+
+	// 记录选票
 	r.prs.RecordVote(id, v)
+
+	//
 	return r.prs.TallyVotes()
 }
 
