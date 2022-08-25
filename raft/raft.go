@@ -697,6 +697,7 @@ func (r *raft) tickHeartbeat() {
 }
 
 func (r *raft) becomeFollower(term uint64, lead uint64) {
+	fmt.Printf("becomeFollower\n")
 	r.step = stepFollower
 	r.reset(term)
 	// 在追随者状态tick函数是选举
@@ -707,6 +708,7 @@ func (r *raft) becomeFollower(term uint64, lead uint64) {
 }
 
 func (r *raft) becomeCandidate() {
+	fmt.Printf("becomeCandidate\n")
 	// TODO(xiangli) remove the panic when the raft implementation is stable
 	if r.state == StateLeader {
 		panic("invalid transition [leader -> candidate]")
@@ -723,6 +725,7 @@ func (r *raft) becomeCandidate() {
 
 // 变成预备候选人
 func (r *raft) becomePreCandidate() {
+	fmt.Printf("becomePreCandidate\n")
 	// TODO(xiangli) remove the panic when the raft implementation is stable
 	if r.state == StateLeader {
 		panic("invalid transition [leader -> pre-candidate]")
@@ -745,6 +748,7 @@ func (r *raft) becomePreCandidate() {
 }
 
 func (r *raft) becomeLeader() {
+	fmt.Printf("becomeLeader\n")
 	// TODO(xiangli) remove the panic when the raft implementation is stable
 	if r.state == StateFollower {
 		panic("invalid transition [follower -> leader]")
@@ -871,7 +875,7 @@ func (r *raft) campaign(t CampaignType) {
 // id是投票人id
 // v是投支持票还是反对票
 func (r *raft) poll(id uint64, t pb.MessageType, v bool) (granted int, rejected int, result quorum.VoteResult) {
-	fmt.Printf("%v投票给%v 是否支持 %v 消息类型 %v", id, r.id, v, t)
+	fmt.Printf("%x 投票给 %x 是否支持 %v 消息类型 %v\n", id, r.id, v, t)
 	if v {
 		r.logger.Infof("%x received %s from %x at term %d", r.id, t, id, r.Term)
 	} else {
