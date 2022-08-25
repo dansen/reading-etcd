@@ -6505,6 +6505,7 @@ func (c *kVClient) Range(ctx context.Context, in *RangeRequest, opts ...grpc.Cal
 	return out, nil
 }
 
+// put 接口
 func (c *kVClient) Put(ctx context.Context, in *PutRequest, opts ...grpc.CallOption) (*PutResponse, error) {
 	out := new(PutResponse)
 	err := c.cc.Invoke(ctx, "/etcdserverpb.KV/Put", in, out, opts...)

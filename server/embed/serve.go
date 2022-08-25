@@ -340,6 +340,7 @@ type accessController struct {
 	mux *http.ServeMux
 }
 
+// 这里是 http 接口的总入口
 func (ac *accessController) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	if req == nil {
 		http.Error(rw, "Request is nil", http.StatusBadRequest)

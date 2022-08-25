@@ -53,15 +53,20 @@ func newPeerHandler(
 	if lg == nil {
 		lg = zap.NewNop()
 	}
+
 	peerMembersHandler := newPeerMembersHandler(lg, s.Cluster())
 	peerMemberPromoteHandler := newPeerMemberPromoteHandler(lg, s)
 
+	// 设置回调
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", http.NotFound)
 	mux.Handle(rafthttp.RaftPrefix, raftHandler)
 	mux.Handle(rafthttp.RaftPrefix+"/", raftHandler)
+
+	// member 接口
 	mux.Handle(peerMembersPath, peerMembersHandler)
 	mux.Handle(peerMemberPromotePrefix, peerMemberPromoteHandler)
+
 	if leaseHandler != nil {
 		mux.Handle(leasehttp.LeasePrefix, leaseHandler)
 		mux.Handle(leasehttp.LeaseInternalPrefix, leaseHandler)
@@ -69,9 +74,12 @@ func newPeerHandler(
 	if downgradeEnabledHandler != nil {
 		mux.Handle(etcdserver.DowngradeEnabledPath, downgradeEnabledHandler)
 	}
+
 	if hashKVHandler != nil {
 		mux.Handle(etcdserver.PeerHashKVPath, hashKVHandler)
 	}
+
+	// version 接口
 	mux.HandleFunc(versionPath, versionHandler(s, serveVersion))
 	return mux
 }

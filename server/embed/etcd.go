@@ -269,6 +269,7 @@ func StartEtcd(inCfg *Config) (e *Etcd, err error) {
 	}
 	e.Server.Start()
 
+	// 启动 http 服务器
 	if err = e.servePeers(); err != nil {
 		return e, err
 	}
@@ -561,11 +562,14 @@ func (e *Etcd) servePeers() (err error) {
 	for _, p := range e.Peers {
 		u := p.Listener.Addr().String()
 		m := cmux.New(p.Listener)
+
+		// 创建了一个http server
 		srv := &http.Server{
 			Handler:     ph,
 			ReadTimeout: 5 * time.Minute,
 			ErrorLog:    defaultLog.New(io.Discard, "", 0), // do not log user error
 		}
+
 		go srv.Serve(m.Match(cmux.Any()))
 		p.serve = func() error {
 			e.cfg.logger.Info(

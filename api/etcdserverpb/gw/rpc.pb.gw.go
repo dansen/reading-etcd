@@ -78,6 +78,7 @@ func request_KV_Put_0(ctx context.Context, marshaler runtime.Marshaler, client e
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
+	// 使用 grpc 进行通信
 	msg, err := client.Put(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -2475,6 +2476,7 @@ func RegisterKVHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.Cl
 	return RegisterKVHandlerClient(ctx, mux, etcdserverpb.NewKVClient(conn))
 }
 
+// 这里是 /v3/kv/put 接口的实现
 // etcdserverpb.RegisterKVHandlerClient registers the http handlers for service KV
 // to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "KVClient".
 // Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "KVClient"
