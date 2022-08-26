@@ -81,7 +81,6 @@ func request_KV_Put_0(ctx context.Context, marshaler runtime.Marshaler, client e
 	// 使用 grpc 进行通信
 	msg, err := client.Put(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
-
 }
 
 func local_request_KV_Put_0(ctx context.Context, marshaler runtime.Marshaler, server etcdserverpb.KVServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
@@ -1553,7 +1552,6 @@ func local_request_Auth_RoleRevokePermission_0(ctx context.Context, marshaler ru
 
 	msg, err := server.RoleRevokePermission(ctx, &protoReq)
 	return msg, metadata, err
-
 }
 
 // etcdserverpb.RegisterKVHandlerServer registers the http handlers for service KV to "mux".
@@ -2470,6 +2468,7 @@ func RegisterKVHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, e
 	return RegisterKVHandler(ctx, mux, conn)
 }
 
+// 注册 kv 处理，http转成grpc
 // RegisterKVHandler registers the http handlers for service KV to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
 func RegisterKVHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {

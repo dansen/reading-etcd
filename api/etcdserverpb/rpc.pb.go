@@ -6549,8 +6549,8 @@ type KVServer interface {
 	// Put puts the given key into the key-value store.
 	// A put request increments the revision of the key-value store
 	// and generates one event in the event history.
-	Put(context.Context, *PutRequest) (*PutResponse, error)
 	// DeleteRange deletes the given range from the key-value store.
+	Put(context.Context, *PutRequest) (*PutResponse, error)
 	// A delete request increments the revision of the key-value store
 	// and generates a delete event in the event history for every deleted key.
 	DeleteRange(context.Context, *DeleteRangeRequest) (*DeleteRangeResponse, error)

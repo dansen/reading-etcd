@@ -127,13 +127,19 @@ func (sctx *serveCtx) serve(
 	defer close(sctx.serversC)
 
 	if sctx.insecure {
+		// 创建 grpc server
 		gs = v3rpc.Server(s, nil, nil, gopts...)
+
 		v3electionpb.RegisterElectionServer(gs, servElection)
 		v3lockpb.RegisterLockServer(gs, servLock)
+
 		if sctx.serviceRegister != nil {
 			sctx.serviceRegister(gs)
 		}
+
 		grpcl := m.Match(cmux.HTTP2())
+
+		// 开始 serve
 		go func() { errHandler(gs.Serve(grpcl)) }()
 
 		var gwmux *gw.ServeMux
@@ -147,6 +153,7 @@ func (sctx *serveCtx) serve(
 
 		httpmux := sctx.createMux(gwmux, handler)
 
+		// 这是登入权限的 http 接口
 		srvhttp := &http.Server{
 			Handler:  createAccessController(sctx.lg, s, httpmux),
 			ErrorLog: logger, // do not log user error
@@ -158,6 +165,7 @@ func (sctx *serveCtx) serve(
 		httpl := m.Match(cmux.HTTP1())
 		go func() { errHandler(srvhttp.Serve(httpl)) }()
 
+		// 增加 servers
 		sctx.serversC <- &servers{grpc: gs, http: srvhttp}
 		sctx.lg.Info(
 			"serving client traffic insecurely; this is strongly discouraged!",

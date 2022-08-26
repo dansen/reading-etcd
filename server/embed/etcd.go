@@ -273,9 +273,13 @@ func StartEtcd(inCfg *Config) (e *Etcd, err error) {
 	if err = e.servePeers(); err != nil {
 		return e, err
 	}
+
+	// 启动 grpc 服务器
 	if err = e.serveClients(); err != nil {
 		return e, err
 	}
+
+	// 启动监视服务器
 	if err = e.serveMetrics(); err != nil {
 		return e, err
 	}

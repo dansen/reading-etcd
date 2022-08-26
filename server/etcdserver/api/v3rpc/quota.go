@@ -57,6 +57,7 @@ func NewQuotaKVServer(s *etcdserver.EtcdServer) pb.KVServer {
 	}
 }
 
+// 插入元素
 func (s *quotaKVServer) Put(ctx context.Context, r *pb.PutRequest) (*pb.PutResponse, error) {
 	if err := s.qa.check(ctx, r); err != nil {
 		return nil, err

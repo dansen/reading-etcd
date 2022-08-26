@@ -1845,6 +1845,7 @@ func (s *EtcdServer) apply(
 	return appliedt, appliedi, shouldStop
 }
 
+// 插入新的元素
 // applyEntryNormal applies an EntryNormal type raftpb request to the EtcdServer
 func (s *EtcdServer) applyEntryNormal(e *raftpb.Entry) {
 	shouldApplyV3 := membership.ApplyV2storeOnly
@@ -1924,7 +1925,9 @@ func (s *EtcdServer) applyEntryNormal(e *raftpb.Entry) {
 		return
 	}
 
+	// 错误是否为 No Space
 	if ar.Err != errors.ErrNoSpace || len(s.alarmStore.Get(pb.AlarmType_NOSPACE)) > 0 {
+		// 通过 ch 发送返回消息
 		s.w.Trigger(id, ar)
 		return
 	}

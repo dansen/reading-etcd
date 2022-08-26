@@ -52,6 +52,7 @@ func (s *kvServer) Range(ctx context.Context, r *pb.RangeRequest) (*pb.RangeResp
 	return resp, nil
 }
 
+// 插入元素
 func (s *kvServer) Put(ctx context.Context, r *pb.PutRequest) (*pb.PutResponse, error) {
 	if err := checkPutRequest(r); err != nil {
 		return nil, err
