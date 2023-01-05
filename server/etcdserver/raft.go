@@ -242,6 +242,7 @@ func (r *raftNode) start(rh *raftReadyHandler) {
 					// gofail: var raftAfterSaveSnap struct{}
 				}
 
+				// 保存到storage
 				// gofail: var raftBeforeSave struct{}
 				if err := r.storage.Save(rd.HardState, rd.Entries); err != nil {
 					r.lg.Fatal("failed to save Raft hard state and entries", zap.Error(err))

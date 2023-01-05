@@ -30,6 +30,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// put
 func Put(ctx context.Context, lg *zap.Logger, lessor lease.Lessor, kv mvcc.KV, txnWrite mvcc.TxnWrite, p *pb.PutRequest) (resp *pb.PutResponse, trace *traceutil.Trace, err error) {
 	resp = &pb.PutResponse{}
 	resp.Header = &pb.ResponseHeader{}
@@ -81,6 +82,7 @@ func Put(ctx context.Context, lg *zap.Logger, lessor lease.Lessor, kv mvcc.KV, t
 		}
 	}
 
+	// 写入操作
 	resp.Header.Revision = txnWrite.Put(p.Key, val, leaseID)
 	trace.AddField(traceutil.Field{Key: "response_revision", Value: resp.Header.Revision})
 	return resp, trace, nil

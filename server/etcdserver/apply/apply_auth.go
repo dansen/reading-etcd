@@ -16,6 +16,7 @@ package apply
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	pb "go.etcd.io/etcd/api/v3/etcdserverpb"
@@ -43,6 +44,7 @@ func newAuthApplierV3(as auth.AuthStore, base applierV3, lessor lease.Lessor) *a
 	return &authApplierV3{applierV3: base, as: as, lessor: lessor}
 }
 
+// 应用数据
 func (aa *authApplierV3) Apply(ctx context.Context, r *pb.InternalRaftRequest, shouldApplyV3 membership.ShouldApplyV3, applyFunc applyFunc) *Result {
 	aa.mu.Lock()
 	defer aa.mu.Unlock()
@@ -59,12 +61,15 @@ func (aa *authApplierV3) Apply(ctx context.Context, r *pb.InternalRaftRequest, s
 			return &Result{Err: err}
 		}
 	}
+	fmt.Printf("apply 1\n")
 	ret := aa.applierV3.Apply(ctx, r, shouldApplyV3, applyFunc)
+	fmt.Printf("apply 2\n")
 	aa.authInfo.Username = ""
 	aa.authInfo.Revision = 0
 	return ret
 }
 
+// apply put
 func (aa *authApplierV3) Put(ctx context.Context, txn mvcc.TxnWrite, r *pb.PutRequest) (*pb.PutResponse, *traceutil.Trace, error) {
 	if err := aa.as.IsPutPermitted(&aa.authInfo, r.Key); err != nil {
 		return nil, nil, err

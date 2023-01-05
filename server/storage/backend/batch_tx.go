@@ -72,6 +72,7 @@ func (t *batchTx) Lock() {
 }
 
 func (t *batchTx) lock() {
+	// 直接使用mutex互斥量
 	t.Mutex.Lock()
 }
 

@@ -90,12 +90,16 @@ func (mq *LeaseExpiredNotifier) RegisterOrUpdate(item *LeaseWithTime) {
 	}
 }
 
+// 取出元素
 func (mq *LeaseExpiredNotifier) Unregister() *LeaseWithTime {
+	// 队列pop
 	item := heap.Pop(&mq.queue).(*LeaseWithTime)
+	// map的delete操作
 	delete(mq.m, item.id)
 	return item
 }
 
+// 查看元素
 func (mq *LeaseExpiredNotifier) Peek() *LeaseWithTime {
 	if mq.Len() == 0 {
 		return nil
@@ -103,6 +107,7 @@ func (mq *LeaseExpiredNotifier) Peek() *LeaseWithTime {
 	return mq.queue[0]
 }
 
+// 元素数量
 func (mq *LeaseExpiredNotifier) Len() int {
 	return len(mq.m)
 }

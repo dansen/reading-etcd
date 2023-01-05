@@ -212,6 +212,8 @@ func newLessor(lg *zap.Logger, b backend.Backend, cluster cluster, cfg LessorCon
 	if expiredLeaseRetryInterval == 0 {
 		expiredLeaseRetryInterval = defaultExpiredleaseRetryInterval
 	}
+
+	// 管理器对象
 	l := &lessor{
 		leaseMap:                  make(map[LeaseID]*Lease),
 		itemMap:                   make(map[LeaseItem]LeaseID),
@@ -229,6 +231,8 @@ func newLessor(lg *zap.Logger, b backend.Backend, cluster cluster, cfg LessorCon
 		lg:       lg,
 		cluster:  cluster,
 	}
+
+	// 初始化数据
 	l.initAndRecover()
 
 	go l.runLoop()
@@ -739,6 +743,7 @@ func (le *lessor) scheduleCheckpointIfNeeded(lease *Lease) {
 		return
 	}
 
+	// 放到优先级队列中
 	if lease.getRemainingTTL() > int64(le.checkpointInterval.Seconds()) {
 		if le.lg != nil {
 			le.lg.Debug("Scheduling lease checkpoint",
@@ -790,12 +795,15 @@ func (le *lessor) findDueScheduledCheckpoints(checkpointLimit int) []*pb.LeaseCh
 }
 
 func (le *lessor) initAndRecover() {
+	// 创建批处理对象
 	tx := le.b.BatchTx()
 
 	tx.LockOutsideApply()
 	schema.UnsafeCreateLeaseBucket(tx)
+	// 获取所有的lease数据
 	lpbs := schema.MustUnsafeGetAllLeases(tx)
 	tx.Unlock()
+
 	for _, lpb := range lpbs {
 		ID := LeaseID(lpb.ID)
 		if lpb.TTL < le.minLeaseTTL {
@@ -812,6 +820,7 @@ func (le *lessor) initAndRecover() {
 			remainingTTL: lpb.RemainingTTL,
 		}
 	}
+
 	le.leaseExpiredNotifier.Init()
 	heap.Init(&le.leaseCheckpointHeap)
 

@@ -447,6 +447,7 @@ func (c *RaftCluster) RemoveMember(id types.ID, shouldApplyV3 ShouldApplyV3) {
 	}
 }
 
+// 更新数据
 func (c *RaftCluster) UpdateAttributes(id types.ID, attr Attributes, shouldApplyV3 ShouldApplyV3) {
 	c.Lock()
 	defer c.Unlock()

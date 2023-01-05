@@ -349,6 +349,7 @@ func NewServer(cfg config.ServerConfig) (srv *EtcdServer, err error) {
 	srv.beHooks = b.storage.backend.beHooks
 	minTTL := time.Duration((3*cfg.ElectionTicks)/2) * heartbeat
 
+	// 创建租约管理器，管理器用于管理所有的lease租约数据
 	// always recover lessor before kv. When we recover the mvcc.KV it will reattach keys to its leases.
 	// If we recover mvcc.KV first, it will attach the keys to the wrong lessor before it recovers.
 	srv.lessor = lease.NewLessor(srv.Logger(), srv.be, srv.cluster, lease.LessorConfig{

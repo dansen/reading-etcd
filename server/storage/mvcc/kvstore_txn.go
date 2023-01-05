@@ -131,6 +131,7 @@ type storeTxnWrite struct {
 	changes  []mvccpb.KeyValue
 }
 
+// mvcc write
 func (s *store) Write(trace *traceutil.Trace) TxnWrite {
 	s.mu.RLock()
 	tx := s.b.BatchTx()

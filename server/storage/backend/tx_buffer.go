@@ -183,6 +183,7 @@ func (bb *bucketBuffer) ForEach(visitor func(k, v []byte) error) error {
 func (bb *bucketBuffer) add(k, v []byte) {
 	bb.buf[bb.used].key, bb.buf[bb.used].val = k, v
 	bb.used++
+	// 扩容操作
 	if bb.used == len(bb.buf) {
 		buf := make([]kv, (3*len(bb.buf))/2)
 		copy(buf, bb.buf)

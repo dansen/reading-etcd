@@ -957,6 +957,7 @@ func (w *WAL) Save(st raftpb.HardState, ents []raftpb.Entry) error {
 	}
 	if curOff < SegmentSizeBytes {
 		if mustSync {
+			// sync 保存文件
 			return w.sync()
 		}
 		return nil

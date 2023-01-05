@@ -43,8 +43,12 @@ const (
 // The granted lease should have a unique ID with a term
 // that is greater than minLeaseTTL.
 func TestLessorGrant(t *testing.T) {
+	// 创建一个空的log
 	lg := zap.NewNop()
+	// 创建一个后端
 	dir, be := NewTestBackend(t)
+
+	// 测试结束后删除目录，关闭后端
 	defer os.RemoveAll(dir)
 	defer be.Close()
 
@@ -52,6 +56,7 @@ func TestLessorGrant(t *testing.T) {
 	defer le.Stop()
 	le.Promote(0)
 
+	// leaseid ttl
 	l, err := le.Grant(1, 1)
 	if err != nil {
 		t.Fatalf("could not grant lease 1 (%v)", err)
@@ -670,10 +675,15 @@ func (fd *fakeDeleter) DeleteRange(key, end []byte) (int64, int64) {
 }
 
 func NewTestBackend(t *testing.T) (string, backend.Backend) {
+	// zap用于testing的log
 	lg := zaptest.NewLogger(t)
+	// 单元测试的临时文件夹
 	tmpPath := t.TempDir()
+	// 默认后端配置
 	bcfg := backend.DefaultBackendConfig(lg)
+	//
 	bcfg.Path = filepath.Join(tmpPath, "be")
+	// 创建一个kv后端
 	return tmpPath, backend.New(bcfg)
 }
 
